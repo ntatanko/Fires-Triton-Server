@@ -1,0 +1,52 @@
+name: "fires"
+
+platform: "onnxruntime_onnx"
+
+backend: "onnxruntime"
+
+max_batch_size: 64
+
+input [
+  {
+    name: "input"
+    data_type: TYPE_FP32
+    dims: [ 3, 384, 384 ]
+  }
+]
+output [
+  {
+    name: "output"
+    data_type: TYPE_FP32
+    dims: [ 1, 384, 384 ]
+  }
+]
+
+# dynamic_batching {
+#   preferred_batch_size: [ 4, 8, 16 ]
+#   max_queue_delay_microseconds: 100
+# }
+
+optimization { execution_accelerators {
+  gpu_execution_accelerator : [ {
+    name : "tensorrt"
+    parameters { key: "precision_mode" value: "FP16" }
+    parameters { key: "max_workspace_size_bytes" value: "1073741824" }
+    }]
+}}
+
+## un-comment to enable model optimization on startup
+
+# model_warmup {
+#     name: "warmup_batch_16"
+#     batch_size: 16
+#     inputs: {
+#         key: "input.1"
+#         value: {
+#             data_type: TYPE_FP32
+#             dims: 3
+#             dims: 384
+#             dims: 384
+#             zero_data: true
+#         }
+#     }
+# }
